@@ -16,6 +16,7 @@ function SearchOder() {
         placeholder="Search oder #"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        className=""
       />
     </form>
   );
