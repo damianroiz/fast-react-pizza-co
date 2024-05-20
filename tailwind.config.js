@@ -6,6 +6,12 @@ export default {
     fontFamily: {
       sans: 'Roboto Mono, monospace',
     },
+    fontSize: {
+      screen: '100dvh',
+    },
+    // colors: {
+    //   pizza: '#123456',
+    // },
     extend: {},
   },
   plugins: [],
