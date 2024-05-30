@@ -6,16 +6,13 @@ function Menu() {
   const menu = useLoaderData();
 
   return (
-    <ul >
-      <li className="divide-y divide-stone-200 px-2">
-        {menu.map((pizza) => (
-          <MenuItem pizza={pizza} key={pizza.id} />
-        ))}
-      </li>
+    <ul className="divide-y divide-stone-200 px-2">
+      {menu.map((pizza) => (
+        <MenuItem pizza={pizza} key={pizza.id} />
+      ))}
     </ul>
   );
 }
-
 export async function loader() {
   const menu = await getMenu();
   return menu;
