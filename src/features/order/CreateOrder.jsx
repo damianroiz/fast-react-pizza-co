@@ -4,10 +4,9 @@ import { createOrder } from '../../services/apiRestaurant';
 import Button from '../../ui/Button';
 import EmptyCart from '../cart/EmptyCart';
 import { useSelector, useDispatch } from 'react-redux';
-import { getCart, getTotalCartPrice } from '../cart/cartSlice';
-import { formatCurrency } from '../../utils/helpers';
+import { clearCart, getCart, getTotalCartPrice } from '../cart/cartSlice';
 import store from '../../store';
-import { clearCart } from '../cart/cartSlice';
+import { formatCurrency } from '../../utils/helpers';
 import { fetchAddress } from '../user/userSlice';
 
 // https://uibakery.io/regex-library/phone-number
@@ -23,14 +22,15 @@ function CreateOrder() {
     status: addressStatus,
     position,
     address,
+    error: errorAddress,
   } = useSelector((state) => state.user);
 
   const isLoadingAddress = addressStatus === 'loading';
 
-  const navigation = useNavigation();
-  const isSubmitting = navigation.state === 'submitting';
   const formErrors = useActionData();
   const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state === 'submitting';
 
   const cart = useSelector(getCart);
   const totalCartPrice = useSelector(getTotalCartPrice);
@@ -74,7 +74,7 @@ function CreateOrder() {
             />
             {addressStatus === 'error' && (
               <p className="text-xs mt-2 rounded-md bg-red-100 p-2 text-red-700">
-                {formErrors.phone}
+                {errorAddress}
               </p>
             )}
           </div>
@@ -85,7 +85,7 @@ function CreateOrder() {
                 disabled={isLoadingAddress}
                 type="small"
                 onClick={(e) => {
-                  e.prevelDefault();
+                  e.preventDefault();
                   () => dispatch(fetchAddress());
                 }}
               >
@@ -111,6 +111,7 @@ function CreateOrder() {
 
         <div>
           <input type="hidden" name="cart" value={JSON.stringify(cart)} />
+          <input type="hidden" name="position" value={position.longitude && position.latitude ? `${position.latitude},${position.longitude}` : ''} />
           <Button type="primary" disabled={isSubmitting || isLoadingAddress}>
             {isSubmitting
               ? 'Placing Order...'
@@ -131,12 +132,13 @@ export async function action({ request }) {
     cart: JSON.parse(data.cart),
     priority: data.priority === 'true',
   };
+
+  console.log(order)
   const errors = {};
   if (!isValidPhone(order.phone))
     errors.phone =
       'Please give us your phone number as we might need to contact you';
 
-  // // when there's an error the function retuns inmediately
   if (Object.keys(errors).length > 0) return errors;
 
   // // if everything is ok, create new order and redirect
